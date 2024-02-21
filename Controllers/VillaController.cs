@@ -57,7 +57,7 @@ namespace MagicVilla_API.Controllers
             return _response;
         }
 
-        [HttpGet("id:int", Name = "GetVilla")]
+        [HttpGet("{id:int}", Name = "GetVilla")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -112,9 +112,18 @@ namespace MagicVilla_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                if (_villaRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower()) != null)
+                /*if (_villaRepo.Obtener(v => v.Nombre.ToLower() == createDto.Nombre.ToLower()) != null)
                 {
                     ModelState.AddModelError("NombreExiste", "La villa con ese nombre ya existe!");
+                    return BadRequest(ModelState);
+                }*/
+
+                var villas = await _villaRepo.ObtenerTodos();
+
+                // Verificar si existe una villa con el mismo nombre (ignorando mayúsculas y minúsculas)
+                if (villas.Any(v => v.Nombre.Equals(createDto.Nombre, StringComparison.OrdinalIgnoreCase)))
+                {
+                    ModelState.AddModelError("ErrorMenssages", "La villa con ese nombre ya existe!");
                     return BadRequest(ModelState);
                 }
 
